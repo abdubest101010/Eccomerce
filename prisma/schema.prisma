@@ -8,13 +8,43 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid()) // Changed to String
+  name          String
+  email         String    @unique
+  password      String
+  emailVerified DateTime?
+  image         String?
+  orders        Order[]
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text // Allow longer strings
+  access_token      String? @db.Text // Allow longer strings
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text // Allow longer strings
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid()) // Changed to String
+  sessionToken String   @unique
+  userId       String   // Changed to String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -40,11 +70,10 @@ model Product {
   updatedAt   DateTime  @updatedAt
 }
 
-
 model Order {
   id         Int            @id @default(autoincrement())
   user       User           @relation(fields: [userId], references: [id])
-  userId     Int
+  userId     String         // Changed to String
   products   OrderProduct[]
   total      Float
   status     String

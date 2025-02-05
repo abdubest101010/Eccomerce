@@ -1,11 +1,28 @@
-// CartContext.js
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  // Initialize cartItems state with an empty array
   const [cartItems, setCartItems] = useState([]);
+
+  // Load cart items from local storage on component mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedCart = localStorage.getItem("cartItems");
+      if (storedCart) {
+        setCartItems(JSON.parse(storedCart));
+      }
+    }
+  }, []);
+
+  // Save cart items to local storage whenever they change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }
+  }, [cartItems]);
 
   // Function to add a product to the cart
   const addToCart = (product) => {

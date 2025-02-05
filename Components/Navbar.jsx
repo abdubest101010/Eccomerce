@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useCart } from "@/Components/CartContext"; // Import the useCart hook
+import { useSession, signOut } from "next-auth/react"; // Import useSession and signOut
 
 export default function Navigation() {
   const { cartItems, getTotalAmount } = useCart(); // Access cartItems and getTotalAmount from the context
+  const { data: session, status } = useSession(); // Get session data and status
 
   return (
     <nav className="bg-white shadow-md">
@@ -48,13 +50,35 @@ export default function Navigation() {
               Total: ${getTotalAmount().toFixed(2)}
             </div>
 
-            {/* Sign-in Button */}
-            <Link
-              href="/signin"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
-            >
-              Sign In
-            </Link>
+            {/* Conditional Rendering for Log In, Sign Up, and User Name */}
+            {status === "authenticated" ? (
+              // If the user is logged in, display their name and a logout button
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-800">Welcome, {session.user.name}</span>
+                <button
+                  onClick={() => signOut()}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-200"
+                >
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              // If the user is not logged in, display Log In and Sign Up buttons
+              <>
+                <Link
+                  href="/login"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
